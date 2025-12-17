@@ -1,0 +1,49 @@
+<?php
+include '../includes/auth_check.php';
+include '../config/db.php';
+
+$user_id = $_SESSION['user_id'];
+$sql = "SELECT * FROM tasks WHERE user_id = $user_id ORDER BY created_at DESC";
+$result = $conn->query($sql);
+
+if (isset($_GET['success'])) {
+    $alert = '<div class="alert alert-success">Thành công: ' . ($_GET['success'] == 'added' ? 'Thêm công việc' : ($_GET['success'] == 'updated' ? 'Cập nhật công việc' : 'Xóa công việc')) . '!</div>';
+} elseif (isset($_GET['error'])) {
+    $alert = '<div class="alert alert-danger">Lỗi: Công việc không tồn tại hoặc lỗi hệ thống.</div>';
+}
+?>
+
+<?php include '../includes/header.php'; ?>
+<h2>Danh sách công việc</h2>
+<?php if (isset($alert)) echo $alert; ?>
+<a href="add_task.php" class="btn btn-success mb-3">Thêm công việc mới</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Tiêu đề</th>
+            <th>Mô tả</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if ($result->num_rows > 0): ?>
+            <?php while($row = $result->fetch_assoc()): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($row['title']); ?></td>
+                    <td><?php echo htmlspecialchars($row['description']); ?></td>
+                    <td><?php echo $row['status'] == 'completed' ? '<span class="badge bg-success">Hoàn thành</span>' : '<span class="badge bg-warning">Chưa hoàn thành</span>'; ?></td>
+                    <td><?php echo date('d/m/Y H:i', strtotime($row['created_at'])); ?></td>
+                    <td>
+                        <a href="edit_task.php?id=<?php echo $row['id']; ?>" class="btn btn-warning btn-sm">Sửa</a>
+                        <a href="delete_task.php?id=<?php echo $row['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Xác nhận xóa công việc này?')">Xóa</a>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <tr><td colspan="5" class="text-center">Chưa có công việc nào. Hãy thêm mới!</td></tr>
+        <?php endif; ?>
+    </tbody>
+</table>
+<?php include '../includes/footer.php'; ?>
