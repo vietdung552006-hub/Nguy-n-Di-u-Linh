@@ -1,0 +1,60 @@
+<?php
+include '../includes/auth_check.php';
+include '../config/db.php';
+
+if (isset($_GET['id'])) {
+    $id = (int)$_GET['id'];
+    $user_id = $_SESSION['user_id'];
+
+    $stmt = $pdo->prepare("SELECT * FROM tasks WHERE id = :id AND user_id = :user_id");
+    $stmt->execute(['id' => $id, 'user_id' => $user_id]);
+    $task = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$task) {
+        header('Location: index.php?error=not_found');
+        exit();
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $title = $_POST['title'];
+    $description = !empty($_POST['description']) ? $_POST['description'] : null;
+    $due_date = !empty($_POST['due_date']) ? $_POST['due_date'] : null;
+    $status = $_POST['status'];
+
+    $stmt = $pdo->prepare("UPDATE tasks SET title = :title, description = :description, due_date = :due_date, status = :status WHERE id = :id AND user_id = :user_id");
+    if ($stmt->execute(['title' => $title, 'description' => $description, 'due_date' => $due_date, 'status' => $status, 'id' => $id, 'user_id' => $user_id])) {
+        header('Location: index.php?success=updated');
+        exit();
+    } else {
+        $error = "Lỗi cập nhật!";
+    }
+}
+?>
+
+<?php include '../includes/header.php'; ?>
+<h2>Sửa công việc</h2>
+<?php if (isset($error)): ?><div class="alert alert-danger"><?php echo $error; ?></div><?php endif; ?>
+<form method="POST">
+    <div class="mb-3">
+        <label class="form-label">Tiêu đề</label>
+        <input type="text" name="title" class="form-control" value="<?php echo htmlspecialchars($task['title']); ?>" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Mô tả</label>
+        <textarea name="description" class="form-control" rows="4"><?php echo htmlspecialchars($task['description'] ?? ''); ?></textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Ngày hết hạn</label>
+        <input type="date" name="due_date" class="form-control" value="<?php echo $task['due_date'] ?? ''; ?>">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Trạng thái</label>
+        <select name="status" class="form-select">
+            <option value="pending" <?php if ($task['status'] == 'pending') echo 'selected'; ?>>Pending</option>
+            <option value="in_progress" <?php if ($task['status'] == 'in_progress') echo 'selected'; ?>>In Progress</option>
+            <option value="completed" <?php if ($task['status'] == 'completed') echo 'selected'; ?>>Completed</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Cập nhật</button>
+</form>
+<?php include '../includes/footer.php'; ?>

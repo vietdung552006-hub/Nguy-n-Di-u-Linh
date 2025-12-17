@@ -1,0 +1,11 @@
+# Ứng dụng Quản lý Công việc Cá nhân - Simple To-Do List
+
+Dựa trên yêu cầu bài tập: Xây dựng ứng dụng PHP + MySQL với xác thực và CRUD công việc.
+
+## Hướng dẫn cài đặt
+1. Tạo database MySQL tên `todo_list` và import file sql/database.sql.
+2. Chỉnh sửa config/db.php với thông tin DB (host, username, password).
+3. Chạy server local (XAMPP/WAMP) và truy cập http://localhost/public/login.php để đăng nhập/đăng ký.
+4. Chức năng: Đăng ký (với email tùy chọn), đăng nhập, đăng xuất, thêm/sửa/xóa công việc, thay đổi trạng thái, sắp xếp theo due_date, lọc theo status.
+
+Tác giả: Nguyen Bao Lam - 2205HTTB029

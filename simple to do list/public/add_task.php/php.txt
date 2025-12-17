@@ -1,0 +1,39 @@
+<?php
+include '../includes/auth_check.php';
+include '../config/db.php';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $title = $_POST['title'];
+    $description = !empty($_POST['description']) ? $_POST['description'] : null;
+    $due_date = !empty($_POST['due_date']) ? $_POST['due_date'] : null;
+    $user_id = $_SESSION['user_id'];
+
+    $stmt = $pdo->prepare("INSERT INTO tasks (user_id, title, description, due_date, status) VALUES (:user_id, :title, :description, :due_date, 'pending')");
+    if ($stmt->execute(['user_id' => $user_id, 'title' => $title, 'description' => $description, 'due_date' => $due_date])) {
+        header('Location: index.php?success=added');
+        exit();
+    } else {
+        $error = "Lỗi thêm công việc!";
+    }
+}
+?>
+
+<?php include '../includes/header.php'; ?>
+<h2>Thêm công việc mới</h2>
+<?php if (isset($error)): ?><div class="alert alert-danger"><?php echo $error; ?></div><?php endif; ?>
+<form method="POST">
+    <div class="mb-3">
+        <label class="form-label">Tiêu đề (bắt buộc)</label>
+        <input type="text" name="title" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Mô tả (tùy chọn)</label>
+        <textarea name="description" class="form-control" rows="4"></textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Ngày hết hạn (tùy chọn)</label>
+        <input type="date" name="due_date" class="form-control">
+    </div>
+    <button type="submit" class="btn btn-primary">Thêm</button>
+</form>
+<?php include '../includes/footer.php'; ?>
